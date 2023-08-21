@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+    
+    {
+        "command": "npm start",
+        "name": "Run npm start",
+        "request": "launch",
+        "type": "node-terminal",
+    },
+        {
+            "name": "Launch TypeScript",
+            "type": "pwa-node",
+            "request": "launch",
+            "runtimeArgs": [],
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": ["<node_internals>/**", "node_modules/**"],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+            }
+        }
+    ]
+}
