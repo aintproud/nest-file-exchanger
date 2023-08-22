@@ -14,7 +14,4 @@ export class AppService {
     .pipe(createWriteStream(`data/${id}.zip`))
     return id
   }
-	async getById(id: string) {
-		
-	}
 }
