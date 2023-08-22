@@ -1,12 +1,8 @@
-import { Controller, Get, UseFilters, Res, ParseUUIDPipe, Param, Post, UseInterceptors, UploadedFile, UploadedFiles, ParseFilePipeBuilder, HttpStatus, UsePipes, HttpCode } from '@nestjs/common';
+import { Controller, Get, Res, ParseUUIDPipe, Param, Post, UseInterceptors, UploadedFiles, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response } from 'express';
 import { UUID } from 'crypto';
-import { extname, join } from 'path';
-import { diskStorage } from 'multer';
-import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { createReadStream, readdirSync } from 'fs';
-import * as archiver from 'archiver'
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class AppController {
@@ -33,18 +29,9 @@ export class AppController {
 	}
 
 	@Get(':id')
-	async downloadZip(@Res() res: Response) {
-		const output = createReadStream(join(__dirname, 'archive.zip'));
-	
-		res.writeHead(200, {
-		  'Content-Type': 'application/zip',
-		  'Content-Disposition': 'attachment; filename=archive.zip',
-		});
-	
-		const archive = archiver('zip');
-	
-		archive.pipe(res);
-		archive.directory('../data', false);
-		archive.finalize();
-	  }
+	async downloadZip(@Param('id', new ParseUUIDPipe()) id: UUID, @Res() res: Response) {
+		res.sendFile(`data/${id}.zip`, { root: '.' })
+		res.status(HttpStatus.OK)
+
+	}
 }

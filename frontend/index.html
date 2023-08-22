@@ -27,14 +27,15 @@
     body: formData
   })
   .then(async response => {
+    const idField = document.createElement('div')
     if (response.ok) {
       const json = await response.json()
       console.log('Files uploaded successfully');
-      const idField = document.createElement('div')
-      idField.innerText = `Файлы загружены, ваш id: ${json.id}`;
+      idField.innerText = `http://localhost:3000/${json.id}`
       form.append(idField);
     } else {
-      console.log('Failed to upload files');
+      idField.innerText = `error: ${response.status} ${response.statusText}`
+      form.append(idField);
     }
   })
   .catch(error => {
