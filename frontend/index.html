@@ -1,5 +1,44 @@
 <h1>File Upload</h1>
-<form method="post" enctype="multipart/form-data">
+<form id="form" enctype="multipart/form-data">
   <input type="file" id="files" name="file" multiple>
-  <input type="submit" value="Загрузить">
+  <input type="button" id="sendButton" value="Загрузить">
 </form>
+
+<script>
+  const form = document.getElementById('form');
+  const sendButton = document.getElementById('sendButton');
+  sendButton.addEventListener('click', postFiles);
+  function postFiles() {
+  const fileInput = document.getElementById('files');
+  const files = fileInput.files;
+
+  if (files.length < 1 || files.length > 5) {
+    console.log('Invalid number of files. Minimum: 1, Maximum: 5');
+    return;
+  }
+
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('file', files[i]);
+  }
+
+  fetch('/', {
+    method: 'POST',
+    body: formData
+  })
+  .then(async response => {
+    if (response.ok) {
+      const json = await response.json()
+      console.log('Files uploaded successfully');
+      const idField = document.createElement('div')
+      idField.innerText = `Файлы загружены, ваш id: ${json.id}`;
+      form.append(idField);
+    } else {
+      console.log('Failed to upload files');
+    }
+  })
+  .catch(error => {
+    console.log('An error occurred while uploading files:', error);
+  });
+}
+</script>

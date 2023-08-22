@@ -1,19 +1,20 @@
-import { Controller, Get, UseFilters, Res, ParseUUIDPipe, Param, Post, UseInterceptors, UploadedFile, UploadedFiles, ParseFilePipeBuilder, HttpStatus, UsePipes } from '@nestjs/common';
+import { Controller, Get, UseFilters, Res, ParseUUIDPipe, Param, Post, UseInterceptors, UploadedFile, UploadedFiles, ParseFilePipeBuilder, HttpStatus, UsePipes, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response } from 'express';
 import { UUID } from 'crypto';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { diskStorage } from 'multer';
 import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { createReadStream, readdirSync } from 'fs';
+import * as archiver from 'archiver'
 
-@UseFilters()
 @Controller()
 export class AppController {
 	constructor(private readonly appService: AppService) {}
 
 	@Get()
 	sendFile(@Res() res: Response) {
-		res.sendFile('frontend/index.html', { root: '.' });
+		res.sendFile('frontend/index.html', { root: '.' })
 	}
 
 	@Post()
@@ -21,17 +22,29 @@ export class AppController {
 	async uploadFile(@UploadedFiles(
 		new ParseFilePipeBuilder()
 		  .addMaxSizeValidator({
-			maxSize: 1000
+			maxSize: 1000000
 		  })
 		  .build({
 			errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 		  }),
-	  ) files: Array<Express.Multer.File>) {
-		return await this.appService.handleFiles(files);
+	  ) files: Array<Express.Multer.File>, @Res () res: Response) {
+		const id = await this.appService.handleFiles(files);
+		res.status(HttpStatus.OK).json({ id });
 	}
 
 	@Get(':id')
-	async getById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: UUID) {
-		await this.appService.getById(id)
-	}
+	async downloadZip(@Res() res: Response) {
+		const output = createReadStream(join(__dirname, 'archive.zip'));
+	
+		res.writeHead(200, {
+		  'Content-Type': 'application/zip',
+		  'Content-Disposition': 'attachment; filename=archive.zip',
+		});
+	
+		const archive = archiver('zip');
+	
+		archive.pipe(res);
+		archive.directory('../data', false);
+		archive.finalize();
+	  }
 }

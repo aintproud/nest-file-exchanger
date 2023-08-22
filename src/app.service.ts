@@ -6,12 +6,14 @@ import { mkdir, writeFile, writeFileSync } from 'fs';
 @Injectable()
 export class AppService {
 	async handleFiles(files) {
-    const uuid = randomUUID()
-    mkdir(`./data/${uuid}`, (err) => err? console.error(err) : console.log(`folder ${uuid} created`))
+    const id = randomUUID()
+    mkdir(`./data/${id}`, (err) => err? console.error(err) : console.log(`folder ${id} created`))
     
     await Promise.all(files.map(async (file) => {
-      writeFile(`./data/${uuid}/${file.originalname}`, file.buffer, (err) => err? console.error(err) : console.log(`file ${file.originalname} created`))
+      writeFile(`./data/${id}/${file.originalname}`, file.buffer, (err) => err? console.error(err) : console.log(`file ${file.originalname} created`))
     }))
+    
+    return id
   }
 	async getById(id: string) {
 		return 'Hello World!';
